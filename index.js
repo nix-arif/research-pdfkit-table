@@ -37,10 +37,108 @@ class PDFDocumentWithTable extends PDFDocument {
 
         if (!table.headers.length) reject(new Error("Headers not defined"));
 
-        const title = table.title ? table.title : options.title || "arif";
-        console.log("table.title:", table.title);
-        console.log("options.title:", title);
+        const title = table.title ? table.title : options.title || "";
+        const subtitle = table.subtitle
+          ? table.subtitle
+          : options.subtitle || "";
 
+        // const columnIsDefined = options.columnSize.length ? true : false;
+        const columnSpacing = options.columnSpacing || 3;
+        let columnSize = [];
+        let columnPositions = []; // 0, 10, 20, 30, 100
+        let columnWidth = 0;
+
+        const rowDistance = 0.5;
+        let cellPadding = { top: 0, right: 0, bottom: 0, left: 0 }; //universal
+
+        const prepareHeader =
+          options.prepareHeader ||
+          (() =>
+            this.fillColor("black").font("Helvetica-Bold").fontSize(8).fill());
+
+        const prepareRow =
+          options.prepareRow ||
+          ((row, indexColumn, indexRow, rectRow, rectCell) =>
+            this.fillColor("black").font("Helvetica").fontSize(8).fill());
+
+        let tableWidth = 0;
+        const maxY = this.page.height - this.page.margins.bottom;
+
+        let startX = options.x || this.x || this.page.margins.left;
+        let startY = options.y || this.y || this.page.margins.top;
+
+        let lastPositionX = 0;
+        let rowBottomY = 0;
+
+        //------------experimental fast variables
+        this.titleHeight = 0;
+        this.headerHeight = 0;
+        this.firstLineHeight = 0;
+        this.lockAddTitles = false;
+        this.lockAddPage = false;
+        this.lockAddHeader = false;
+        this.safelyMarginBottom = 15;
+
+        // reset position to margin.left
+        if (options.x === null || options.x === -1) {
+          startX = this.page.margins.left;
+        }
+
+        const createTitle = (data, size, opacity) => {
+          // Title
+          if (!data) return;
+
+          // get height line
+          // let cellHeight = 0
+          // if string
+          if (typeof data === "string") {
+            // font size
+            this.fillColor("black")
+              .font("Helvetica")
+              .fontSize(8)
+              .fontSize(size)
+              .opacity(opacity);
+
+            // write
+            this.text(data, startX, startY).opacity(1);
+            // startY += cellHeight;
+            startY = this.y + columnSpacing + 2;
+          }
+        };
+
+        const computeRowHeight = (row) => {
+          let result = 0;
+          let cellp;
+
+          // if row is object, content with property and options
+          if (!Array.isArray(row)) {
+            console.log("not array");
+          }
+					
+        };
+
+        // Header
+
+        const addHeader = () => {
+          // Allow the user to override style for headers
+          prepareHeader();
+
+          // calc header height
+          if (this.headerHeight === 0) {
+            this.headerHeight = computeRowHeight(table.headers);
+          }
+        };
+
+        addHeader();
+
+        console.log("options.x", options.x);
+        console.log("options.y", options.y);
+        console.log("this.x:", this.x);
+        console.log("this.y:", this.y);
+        console.log("marginLeft:", this.page.margins.left);
+        console.log("marginTop:", this.page.margins.top);
+        console.log("startX:", startX);
+        console.log("startY:", startY);
         console.log(table);
       } catch (error) {
         console.log(error);
