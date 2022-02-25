@@ -2,8 +2,8 @@
 const table = {
     title: undefined,
     headers: [String@Object],
-    datas: '',
-    rows: '',
+    datas: [], // datas and rows must exist either one
+    rows: [[String]],
     options: {
         columnSpacing: 3
         divider: {

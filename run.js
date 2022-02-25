@@ -13,6 +13,8 @@ try {
       options: {
         padding: 0,
       },
+      // datas: ["data1", "data2"],
+      rows: [["row1", "row2"]],
     },
   ]);
 } catch (error) {

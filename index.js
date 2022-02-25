@@ -146,7 +146,11 @@ class PDFDocumentWithTable extends PDFDocument {
           let cellp;
 
           // if row is object, content with property and options
-          if (!Array.isArray(row)) {
+          if (
+            !Array.isArray(row) &&
+            typeof row === "object" &&
+            !row.hasOwnPropert("property")
+          ) {
             // Not implemented
             console.log("not array");
           }
@@ -165,7 +169,6 @@ class PDFDocumentWithTable extends PDFDocument {
             }
 
             text = String(text).replace("bold:", "").replace("size", "");
-            console.log("text 168:", text);
 
             // cell padding
             cellp = prepareCellPadding(
@@ -198,6 +201,16 @@ class PDFDocumentWithTable extends PDFDocument {
           }
 
           // calc first table line when init table
+          if (this.firstLineHeight === 0) {
+            if (table.datas.length > 0) {
+              // TODO implement
+            } else if (table.rows.length > 0) {
+              this.firstLineHeight = computeRowHeight(table.rows[0]);
+              console.log("this.firstLineHeight", this.firstLineHeight);
+            }
+          }
+
+          // 24.1 is height calc title + subtitle
         };
 
         addHeader();

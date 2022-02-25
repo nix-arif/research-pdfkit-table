@@ -10,3 +10,12 @@ let c = a || b;
 let x = 263.00019;
 x = x.toString(2);
 console.log(x >> 0);
+
+let y = "name";
+
+a = {
+  name: "name",
+  age: "age",
+};
+
+console.log(a.hasOwnProperty("name"));
