@@ -5,11 +5,25 @@ const doc = new PDFDocument();
 
 doc.pipe(fs.createWriteStream("test.pdf"));
 
-doc.text("Hello");
 try {
-  doc.tables([{ name: "arif", headers: ["name", "age"] }]);
+  doc.tables([
+    {
+      name: "arif",
+      headers: ["name", "age"],
+      options: {
+        padding: 0,
+      },
+    },
+  ]);
 } catch (error) {
   console.log(error);
 }
 
 doc.end();
+
+// headers: [
+//   {
+//     label: "name",
+//     padding: [0, 0, 0, 0],
+//   },
+// ],

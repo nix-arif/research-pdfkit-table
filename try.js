@@ -7,4 +7,6 @@ b = 10;
 
 let c = a || b;
 
-console.log(c);
+let x = 263.00019;
+x = x.toString(2);
+console.log(x >> 0);

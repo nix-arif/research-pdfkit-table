@@ -44,7 +44,7 @@ class PDFDocumentWithTable extends PDFDocument {
 
         // const columnIsDefined = options.columnSize.length ? true : false;
         const columnSpacing = options.columnSpacing || 3;
-        let columnSize = [];
+        let columnSizes = [];
         let columnPositions = []; // 0, 10, 20, 30, 100
         let columnWidth = 0;
 
@@ -106,15 +106,83 @@ class PDFDocumentWithTable extends PDFDocument {
           }
         };
 
+        const prepareCellPadding = (p) => {
+          // array
+          if (Array.isArray(p)) {
+            switch (p.length) {
+              case 3:
+                p = [...p, 0];
+                break;
+              case 2:
+                p = [...p, ...p];
+                break;
+              case 1:
+                p = Array(4).fill(p[0]);
+                break;
+            }
+          }
+
+          // Number
+          else if (typeof p === "number") {
+            p = Array(4).fill(p);
+          }
+
+          // object
+          else if (typeof p === "object") {
+            const { top, right, bottom, left } = p;
+            p = [top, right, bottom, left];
+          }
+
+          return {
+            top: p[0] >> 0, // int
+            right: p[1] >> 0,
+            bottom: p[2] >> 0,
+            left: p[3] >> 0,
+          };
+        };
+
         const computeRowHeight = (row) => {
           let result = 0;
           let cellp;
 
           // if row is object, content with property and options
           if (!Array.isArray(row)) {
+            // Not implemented
             console.log("not array");
           }
-					
+
+          console.log("row:", row);
+
+          row.forEach((cell, i) => {
+            let text = cell;
+
+            // object
+            // read cell and get label of object
+            //@ Not implemented
+            if (typeof cell === "object") {
+              console.log("cell.label:", cell.label);
+              text = String(cell.label);
+            }
+
+            text = String(text).replace("bold:", "").replace("size", "");
+            console.log("text 168:", text);
+
+            // cell padding
+            cellp = prepareCellPadding(
+              table.headers[i].padding || options.padding || 0
+            );
+
+            // calc height size of string
+            const cellHeight = this.heightOfString(text, {
+              width: columnSizes[i] - (cellp.left + cellp.right),
+              align: "left",
+            });
+
+            result = Math.max(result, cellHeight);
+            console.log("result:", result);
+          });
+
+          return result + columnSpacing;
         };
 
         // Header
@@ -126,7 +194,10 @@ class PDFDocumentWithTable extends PDFDocument {
           // calc header height
           if (this.headerHeight === 0) {
             this.headerHeight = computeRowHeight(table.headers);
+            console.log("this.headerHeight:", this.headerHeight);
           }
+
+          // calc first table line when init table
         };
 
         addHeader();
