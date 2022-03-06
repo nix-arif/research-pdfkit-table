@@ -1,6 +1,37 @@
 const PDFDocument = require("pdfkit");
+const EventEmitter = require("events").EventEmitter;
+
+// custom console.log
+
+["log", "warn", "error"].forEach((methodName) => {
+  const originalMethod = console[methodName];
+  console[methodName] = (...args) => {
+    try {
+      throw new Error();
+    } catch (error) {
+      originalMethod.apply(console, [
+        ...args,
+        "\t\t",
+        error.stack // Grabs the stack trace
+          .split("\n")[2] // Grabs third line
+          .trim() // Removes spaces
+          .substring(3) // Removes three first characters ("at ")
+          .replace(__dirname, "") // Removes script folder path
+          .replace(/\s\(./, " at ") // Removes first parentheses and replaces it with " at "
+          .replace(/\)/, ""), // Removes last parentheses
+      ]);
+    }
+  };
+});
+
+////////////////////////////////////////////////////////////////////////
 
 class PDFDocumentWithTable extends PDFDocument {
+  constructor(option) {
+    super(option);
+    this.emitter = new EventEmitter();
+  }
+
   table(table, options, callback) {
     return new Promise((resolve, reject) => {
       try {
@@ -103,8 +134,24 @@ class PDFDocumentWithTable extends PDFDocument {
             this.text(data, startX, startY).opacity(1);
             // startY += cellHeight;
             startY = this.y + columnSpacing + 2;
-          }
+          } // TODO else
         };
+
+        // add a new page before create table
+        options.addPage === true && this.emitter.emit("addPage");
+
+        // event emitter
+        const onFirePageAdded = () => {
+          // startX = this.page.margins.left
+          startY = this.page.margins.top;
+          rowBottomY = 0;
+          this.addPage();
+          addHeader();
+        };
+
+        // add fire
+        this.emitter.removeAllListeners();
+        this.emitter.on("addPage", onFirePageAdded);
 
         const prepareCellPadding = (p) => {
           // array
@@ -159,6 +206,7 @@ class PDFDocumentWithTable extends PDFDocument {
 
           row.forEach((cell, i) => {
             let text = cell;
+            console.log("cell:", cell);
 
             // object
             // read cell and get label of object
@@ -171,9 +219,13 @@ class PDFDocumentWithTable extends PDFDocument {
             text = String(text).replace("bold:", "").replace("size", "");
 
             // cell padding
+            console.log("table.headers:", table.headers[i]);
+            console.log("table.headers[i].padding:", table.headers[i].padding);
             cellp = prepareCellPadding(
               table.headers[i].padding || options.padding || 0
             );
+
+            console.log("cellp:", cellp);
 
             // calc height size of string
             const cellHeight = this.heightOfString(text, {
@@ -211,6 +263,53 @@ class PDFDocumentWithTable extends PDFDocument {
           }
 
           // 24.1 is height calc title + subtitle
+          console.log("titleHeight:", this.titleHeight);
+          console.log("lockAddTitles:", this.lockAddTitles);
+          this.titleHeight = !this.lockAddTitles ? 24.1 : 0;
+          console.log("titleHeight:", this.titleHeight);
+          //calc if header + first line fit on last page
+          const calc =
+            startY +
+            this.titleHeight +
+            this.firstLineHeight +
+            this.headerHeight +
+            this.safelyMarginBottom;
+
+          // content is big text (crazy!)
+          if (this.firstLineHeight > maxY) {
+            this.lockAddPage = true;
+          } else if (calc > maxY) {
+            this.lockAddPage = true;
+            this.emitter.emit("addPage");
+            return;
+          }
+
+          ////////////TODO-------------------
+          //////Many-------------------------
+          ///////////////////////////////////
+
+          if (table.headers.length > 0) {
+            // simple header
+            if (typeof table.headers[0] === "string") {
+              table.headers.forEach((header, i) => {
+                const rectCell = {
+                  x: lastPositionX,
+                  y: startY - columnSpacing - rowDistance * 2,
+                  width: columnSizes[i],
+                  height: this.headerHeight + columnSpacing,
+                };
+
+                this.text(header, lastPositionX + cellPadding.left, startY, {
+                  width:
+                    Number(columnSizes[i]) -
+                    (cellPadding.left + cellPadding.right),
+                  align: "left",
+                });
+                console.log("columnSizes:", columnSizes);
+                lastPositionX += columnSizes[i] >> 0;
+              });
+            }
+          }
         };
 
         addHeader();
@@ -224,6 +323,7 @@ class PDFDocumentWithTable extends PDFDocument {
         console.log("startX:", startX);
         console.log("startY:", startY);
         console.log(table);
+        console.log(options);
       } catch (error) {
         console.log(error);
       }
