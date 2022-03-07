@@ -1,9 +1,9 @@
 ```
 const table = {
     title: undefined,
-    headers: [String@Object],
+    headers: [String@Object], // headers must be same number of columns with rows
     datas: [], // datas and rows must exist either one
-    rows: [[String]],
+    rows: [[String]], // row must be same number of columns with headers
     options: {
         columnSpacing: 3
         divider: {

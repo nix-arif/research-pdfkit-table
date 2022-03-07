@@ -1,9 +1,9 @@
-const fs = require("fs");
-const PDFDocument = require("./index");
+const fs = require('fs');
+const PDFDocument = require('./index');
 
 const doc = new PDFDocument();
 
-doc.pipe(fs.createWriteStream("test.pdf"));
+doc.pipe(fs.createWriteStream('test.pdf'));
 
 // try {
 //   doc.tables([
@@ -22,13 +22,13 @@ doc.pipe(fs.createWriteStream("test.pdf"));
 // }
 
 const table = {
-  headers: ["name"],
-  rows: [["row1", "row2"]],
-  addPage: true,
+	headers: ['name', 'age'],
+	rows: [['row1', 'row2']],
+	addPage: true,
 };
 
 doc.table(table, {
-  // prepareHeader: () => doc.font("Helvetica-Bold").fontSize(8),
+	// prepareHeader: () => doc.font("Helvetica-Bold").fontSize(8),
 });
 
 doc.end();
