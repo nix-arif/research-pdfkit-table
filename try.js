@@ -19,58 +19,28 @@
 // 	};
 // });
 
-// // test
+const fs = require("fs");
+const PDFDocument = require("pdfkit");
 
-// let a = 10;
-// let b = 10;
+const doc = new PDFDocument();
 
-// const knowObjects = new Map();
-// const generate = function* () {
-// 	while (true) {
-// 		let random = Math.random().toString(16).slice(2, 8);
-// 		yield `0x${random}`;
-// 	}
-// };
+doc.pipe(fs.createWriteStream("test.pdf"));
 
-// const generator = generate();
+const fillColor = "grey";
+const fillOpacity = 0.1;
+const x = 0;
+const y = 0;
+const width = 300;
+const height = 300;
 
-// const refs = {};
+doc
+  .fill(fillColor)
+  // .stroke(fillColor)
+  .fillOpacity(fillOpacity)
+  .rect(x, y, width, height)
+  // .stroke()
+  .fill();
 
-// const findRef = (object) => {
-// 	let address;
-// 	if (knowObjects.has(object)) {
-// 		address = knowObjects.get(object);
-// 	} else {
-// 		address = generator.next().value;
-// 		knowObjects.set(object, address);
-// 		refs[address] = object;
-// 	}
-// 	return address;
-// };
+doc.fillColor("black").fillOpacity(1).text("Hello", 100, 100);
 
-// const person1 = {
-// 	name: 'name',
-// 	age: '23',
-// };
-
-// const person2 = {
-// 	name: 'name',
-// 	age: '23',
-// };
-
-// const reference1 = findRef(person1);
-// const reference2 = findRef(person2);
-
-// console.log(reference1);
-// console.log(reference2);
-
-let a = "A7Bga71";
-a = String(a).replace(/[^0-9]/g, "");
-console.log(a);
-
-a = [0, 1, 2];
-const b = a.reduce((prev, curr, indx) => {
-  console.log(prev);
-  return prev + curr;
-}, 0);
-console.log(b);
+doc.end();

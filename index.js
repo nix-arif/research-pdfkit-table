@@ -309,7 +309,7 @@ class PDFDocumentWithTable extends PDFDocument {
           console.log(h);
 
           // Set columnPositions
-          const reduce = h.reduce((prev, curr, indx) => {
+          h.reduce((prev, curr, indx) => {
             p.push(prev >> 0);
             return prev + curr;
           }, options.x || this.page.margins.left);
@@ -317,6 +317,12 @@ class PDFDocumentWithTable extends PDFDocument {
           // !Set columnSizes
           h.length && (columnSizes = h);
           p.length && (columnPositions = p);
+
+          // (table width) 3o - Sum last position + last header width
+          w = p[p.length - 1] + h[h.length - 1];
+
+          // !Set tableWidth
+          w && (tableWidth = w);
         };
 
         calcColumnSizes();
@@ -373,6 +379,7 @@ class PDFDocumentWithTable extends PDFDocument {
             // simple header
             if (typeof table.headers[0] === "string") {
               table.headers.forEach((header, i) => {
+                // background header
                 const rectCell = {
                   x: lastPositionX,
                   y: startY - columnSpacing - rowDistance * 2,
@@ -383,12 +390,17 @@ class PDFDocumentWithTable extends PDFDocument {
                 // add background
                 this.addBackground(rectCell);
 
-                this.text(header, lastPositionX + cellPadding.left, startY, {
-                  width:
-                    Number(columnSizes[i]) -
-                    (cellPadding.left + cellPadding.right),
-                  align: "left",
-                });
+                // cell padding
+                cellPadding = prepareCellPadding(options.padding || 0);
+
+                this.fillColor("black")
+                  .fillOpacity(1)
+                  .text(header, lastPositionX + cellPadding.left, startY, {
+                    width:
+                      Number(columnSizes[i]) -
+                      (cellPadding.left + cellPadding.right),
+                    align: "left",
+                  });
 
                 lastPositionX += columnSizes[i] >> 0;
                 console.log("lastPositionX", lastPositionX);
