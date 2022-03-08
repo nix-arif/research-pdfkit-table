@@ -64,8 +64,13 @@
 // console.log(reference1);
 // console.log(reference2);
 
-// let a = 'A';
-// a = String(a).replace(/[^0-9]/, '');
-// console.log(a);
+let a = "A7Bga71";
+a = String(a).replace(/[^0-9]/g, "");
+console.log(a);
 
 a = [0, 1, 2];
+const b = a.reduce((prev, curr, indx) => {
+  console.log(prev);
+  return prev + curr;
+}, 0);
+console.log(b);
